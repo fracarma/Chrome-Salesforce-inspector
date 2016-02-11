@@ -42,11 +42,20 @@ chrome.runtime.sendMessage({message: "getSession", orgId: orgId}, function(messa
   // FraCarma: SHORTCUTS start
 
   // We do not want to perform Salesforce API calls for autocomplete on every keystroke, so we only perform these when the user pressed Ctrl+Space
+<<<<<<< HEAD
   Mousetrap(document.body).bind('ctrl+space', function(e) {
     vm.queryAutocompleteHandler({ctrlSpace: true});
   });
   Mousetrap(document.body).bind('ctrl+enter', function(e) {
     vm.doExport();
+=======
+  // Chrome on Linux does not fire keypress when the Ctrl key is down, so we listen for keydown. Might be https://code.google.com/p/chromium/issues/detail?id=13891#c50
+  queryInput.addEventListener("keydown", function(e) {
+    if (e.which == 32 /* space */ && e.ctrlKey) {
+      e.preventDefault();
+      vm.queryAutocompleteHandler({ctrlSpace: true});
+    }
+>>>>>>> FETCH_HEAD
   });
 
 
@@ -622,7 +631,7 @@ function dataExportVm(options, queryInput, queryHistoryStorage, copyToClipboard)
           a.title = "Show all data";
           a.addEventListener("click", function(e) {
             e.preventDefault();
-            showAllData({recordAttributes: cell.attributes, useToolingApi: vm.exportResult().isTooling});
+            showAllData({recordAttributes: cell.attributes, useToolingApi: rt.isTooling});
           });
           a.textContent = cell.attributes.type;
           td.appendChild(a);
