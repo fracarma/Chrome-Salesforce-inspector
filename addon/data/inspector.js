@@ -2,6 +2,8 @@
 
 var session, orgId;
 
+var apiVersion = "36.0";
+
 function openFieldSetup(sobjectName, fieldName) {
   let w = open(""); // Open the new tab synchronously, to avoid the pop-up blocker, then later redirect it when we have the URL
   if (!fieldName.endsWith("__c") && !fieldName.endsWith("__pc")) {
@@ -20,7 +22,7 @@ function openFieldSetup(sobjectName, fieldName) {
         namespacePrefix = parts[0];
         developerName = parts[1];
       }
-      askSalesforce("/services/data/v35.0/tooling/query/?q=" + encodeURIComponent("select Id from CustomObject where NamespacePrefix = '" + namespacePrefix + "' and DeveloperName = '" + developerName + "'"))
+      askSalesforce("/services/data/v" + apiVersion + "/tooling/query/?q=" + encodeURIComponent("select Id from CustomObject where NamespacePrefix = '" + namespacePrefix + "' and DeveloperName = '" + developerName + "'"))
         .then(res => w.location = "https://" + session.hostname + "/p/setup/field/StandardFieldAttributes/d?id=" + fieldName + "&type=" + res.records[0].Id.slice(0, -3))
         .catch(function(err) { console.log("Error showing field setup", err); w.location = "data:text/plain,Error showing field setup"; });
     }
@@ -39,7 +41,7 @@ function openFieldSetup(sobjectName, fieldName) {
     if (suffix == "pc" && sobjectName == "Account") {
       sobjectName = "Contact";
     }
-    askSalesforce("/services/data/v35.0/tooling/query/?q=" + encodeURIComponent("select Id from CustomField where EntityDefinition.QualifiedApiName = '" + sobjectName + "' and NamespacePrefix = '" + namespacePrefix + "' and DeveloperName = '" + developerName + "'"))
+    askSalesforce("/services/data/v" + apiVersion + "/tooling/query/?q=" + encodeURIComponent("select Id from CustomField where EntityDefinition.QualifiedApiName = '" + sobjectName + "' and NamespacePrefix = '" + namespacePrefix + "' and DeveloperName = '" + developerName + "'"))
       .then(res => w.location = "https://" + session.hostname + "/" + res.records[0].Id.slice(0, -3))
       .catch(function(err) { console.log("Error showing field setup", err); w.location = "data:text/plain,Error showing field setup"; });
   }
@@ -59,7 +61,7 @@ function openObjectSetup(sobjectName) {
       namespacePrefix = parts[0];
       developerName = parts[1];
     }
-    askSalesforce("/services/data/v35.0/tooling/query/?q=" + encodeURIComponent("select Id from CustomObject where NamespacePrefix = '" + namespacePrefix + "' and DeveloperName = '" + developerName + "'"))
+    askSalesforce("/services/data/v" + apiVersion + "/tooling/query/?q=" + encodeURIComponent("select Id from CustomObject where NamespacePrefix = '" + namespacePrefix + "' and DeveloperName = '" + developerName + "'"))
       .then(res => w.location = "https://" + session.hostname + "/" + res.records[0].Id.slice(0, -3))
       .catch(function(err) { console.log("Error showing field setup", err); w.location = "data:text/plain,Error showing field setup"; });
   }
@@ -139,18 +141,18 @@ function askSalesforceSoap(url, namespace, request) {
   });
 }
 
-function dataExport(options) {
-  chrome.runtime.sendMessage({message: "dataExport", args: encodeURIComponent(btoa(JSON.stringify({orgId: orgId, options: options})))}, function(message) {});
+function dataExportUrl(options) {
+  return chrome.extension.getURL("data/dataExport.html") + "?" + encodeURIComponent(btoa(JSON.stringify({orgId: orgId, options: options})));
 }
 
-function dataImport() {
-  chrome.runtime.sendMessage({message: "dataImport", args: encodeURIComponent(btoa(JSON.stringify({orgId: orgId})))}, function(message) {});
+function dataImportUrl() {
+  return chrome.extension.getURL("data/dataImport.html") + "?" + encodeURIComponent(btoa(JSON.stringify({orgId: orgId})));
 }
 
-function showAllData(recordDesc) {
-  chrome.runtime.sendMessage({message: "showAllData", args: encodeURIComponent(btoa(JSON.stringify({orgId: orgId, recordDesc: recordDesc})))}, function(message) {});
+function showAllDataUrl(recordDesc) {
+  return chrome.extension.getURL("data/showAllData.html") + "?" + encodeURIComponent(btoa(JSON.stringify({orgId: orgId, recordDesc: recordDesc})));
 }
 
-function apiExplore(options) {
-  chrome.runtime.sendMessage({message: "apiExplore", args: encodeURIComponent(btoa(JSON.stringify({orgId: orgId, options: options})))}, function(message) {});
+function apiExploreUrl(options) {
+  return chrome.extension.getURL("data/apiExplore.html") + "?" + encodeURIComponent(btoa(JSON.stringify({orgId: orgId, options: options})));
 }

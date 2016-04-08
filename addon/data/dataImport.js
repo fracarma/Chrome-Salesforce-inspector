@@ -3,7 +3,7 @@ if (!this.isUnitTest) {
 
 var args = JSON.parse(atob(decodeURIComponent(location.search.substring(1))));
 orgId = args.orgId;
-initPopup(true);
+initButton(true);
 chrome.runtime.sendMessage({message: "getSession", orgId: orgId}, function(message) {
   session = message;
 
@@ -218,11 +218,9 @@ function dataImportVm(copyToClipboard) {
       var data = importData().taggedRows.map(row => row.cells);
       return {
         table: [header].concat(data),
+        isTooling: undefined, // Only used in data export
         rowVisibilities: [true].concat(importData().taggedRows.map(row => vm.showStatus[row.status]())),
-        colVisibilities: header.map(c => true),
-        renderCell: function(cell, td) {
-          td.textContent = cell;
-        }
+        colVisibilities: header.map(c => true)
       };
     },
     confirmPopupYes: function() {
@@ -291,8 +289,8 @@ function dataImportVm(copyToClipboard) {
     toggleHelp: function() {
       vm.showHelp(!vm.showHelp());
     },
-    showDescribe: function() {
-      showAllData({
+    showDescribeUrl: function() {
+      return showAllDataUrl({
         recordAttributes: {type: vm.importType(), url: null},
         useToolingApi: vm.useToolingApi()
       });
@@ -365,7 +363,7 @@ function dataImportVm(copyToClipboard) {
   }
 
   var describeInfo = new DescribeInfo(spinFor);
-  spinFor(askSalesforceSoap("/services/Soap/u/35.0", "urn:partner.soap.sforce.com", "<getUserInfo/>").then(function(res) {
+  spinFor(askSalesforceSoap("/services/Soap/u/" + apiVersion, "urn:partner.soap.sforce.com", "<getUserInfo/>").then(function(res) {
     vm.userInfo(res.querySelector("Body userFullName").textContent + " / " + res.querySelector("Body userName").textContent + " / " + res.querySelector("Body organizationName").textContent);
   }));
 
@@ -513,7 +511,7 @@ function dataImportVm(copyToClipboard) {
     updateResult(importData().importTable);
     executeBatch();
 
-    spinFor(askSalesforceSoap(importState.useToolingApi ? "/services/Soap/T/35.0" : "/services/Soap/c/35.0", importState.useToolingApi ? "urn:tooling.soap.sforce.com" : "urn:enterprise.soap.sforce.com", batchXml).then(function(res) {
+    spinFor(askSalesforceSoap(importState.useToolingApi ? "/services/Soap/T/" + apiVersion : "/services/Soap/c/" + apiVersion, importState.useToolingApi ? "urn:tooling.soap.sforce.com" : "urn:enterprise.soap.sforce.com", batchXml).then(function(res) {
       var results = res.querySelectorAll("Body result");
       for (var i = 0; i < results.length; i++) {
         var result = results[i];

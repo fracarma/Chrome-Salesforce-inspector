@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <title>Data Export</title>
-  <link rel="stylesheet" href="chromePopup.css">
+  <link rel="stylesheet" href="button.css">
   <link rel="stylesheet" href="dataLoad.css">
   <link rel="stylesheet" href="dataExport.css">
 </head>
@@ -27,7 +27,7 @@
           <a data-bind="text: value, attr: {title: title}, click: $parent.autocompleteClick" href="about:blank"></a>
         </span>
       </span>
-      <a href="about:blank" class="char-btn" data-bind="click: showDescribe, visible: autocompleteResults().sobjectName, attr: {title: 'Show field info for the ' + autocompleteResults().sobjectName + ' object'}">i</a>
+      <a class="char-btn" data-bind="visible: autocompleteResults().sobjectName, attr: {href: showDescribeUrl(), title: 'Show field info for the ' + autocompleteResults().sobjectName + ' object'}">i</a>
       <a href="about:blank" class="char-btn" data-bind="click: toggleExpand, text: expandAutocomplete() ? '-' : '+'" title="Show all suggestions or only the first line"></a>
     </div>
     <div data-bind="visible: showHelp">
@@ -59,7 +59,7 @@
   </div>
   <script src="knockout-3.2.0.js"></script>
   <script src="inspector.js"></script>
-  <script src="chromePopup.js"></script>
+  <script src="button.js"></script>
   <script src="dataLoad.js"></script>
   <script src="dataExport.js"></script>
   <script src="utils/mousetrap.js"></script>

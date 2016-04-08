@@ -4,7 +4,7 @@ if (!this.isUnitTest) {
 let args = JSON.parse(atob(decodeURIComponent(location.search.substring(1))));
 let options = args.options;
 orgId = args.orgId;
-initPopup(true);
+initButton(true);
 chrome.runtime.sendMessage({message: "getSession", orgId: orgId}, function(message) {
   session = message;
 
@@ -114,8 +114,8 @@ function dataExportVm(options, queryInput, queryHistoryStorage, copyToClipboard)
     toggleExpand() {
       vm.expandAutocomplete(!vm.expandAutocomplete());
     },
-    showDescribe() {
-      showAllData({
+    showDescribeUrl() {
+      return showAllDataUrl({
         recordAttributes: {type: vm.autocompleteResults().sobjectName, url: null},
         useToolingApi: vm.queryTooling()
       });
@@ -158,7 +158,7 @@ function dataExportVm(options, queryInput, queryHistoryStorage, copyToClipboard)
   let describeInfo = new DescribeInfo(spinFor);
   describeInfo.dataUpdate.subscribe(() => queryAutocompleteHandler({newDescribe: true}));
 
-  spinFor(askSalesforceSoap("/services/Soap/u/35.0", "urn:partner.soap.sforce.com", "<getUserInfo/>").then(function(res) {
+  spinFor(askSalesforceSoap("/services/Soap/u/" + apiVersion, "urn:partner.soap.sforce.com", "<getUserInfo/>").then(function(res) {
     vm.userInfo(res.querySelector("Body userFullName").textContent + " / " + res.querySelector("Body userName").textContent + " / " + res.querySelector("Body organizationName").textContent);
   }));
 
@@ -404,7 +404,7 @@ function dataExportVm(options, queryInput, queryHistoryStorage, copyToClipboard)
         let contextValueField = contextValueFields[0];
         let queryMethod = useToolingApi ? "tooling/query" : vm.queryAll() ? "queryAll" : "query";
         let acQuery = "select " + contextValueField.field.name + " from " + contextValueField.sobjectDescribe.name + " where " + contextValueField.field.name + " like '%" + searchTerm.replace(/'/g, "\\'") + "%' group by " + contextValueField.field.name + " limit 100";
-        spinFor(askSalesforce("/services/data/v35.0/" + queryMethod + "/?q=" + encodeURIComponent(acQuery), autocompleteProgress)
+        spinFor(askSalesforce("/services/data/v" + apiVersion + "/" + queryMethod + "/?q=" + encodeURIComponent(acQuery), autocompleteProgress)
           .catch(function(err) {
             vm.autocompleteResults({
               sobjectName: sobjectName,
@@ -615,23 +615,6 @@ function dataExportVm(options, queryInput, queryHistoryStorage, copyToClipboard)
         for (let r = 1 /* always show header */; r < rt.table.length; r++) {
           rt.rowVisibilities[r] = isVisible(rt.table[r], filter);
         }
-      },
-      renderCell(cell, td) {
-        if (typeof cell == "object" && cell != null && cell.attributes && cell.attributes.type) {
-          let a = document.createElement("a");
-          a.href = "about:blank";
-          a.title = "Show all data";
-          a.addEventListener("click", function(e) {
-            e.preventDefault();
-            showAllData({recordAttributes: cell.attributes, useToolingApi: rt.isTooling});
-          });
-          a.textContent = cell.attributes.type;
-          td.appendChild(a);
-        } else if (cell == null) {
-          td.textContent = "";
-        } else {
-          td.textContent = cell;
-        }
       }
     };
     return rt;
@@ -674,7 +657,7 @@ function dataExportVm(options, queryInput, queryHistoryStorage, copyToClipboard)
     exportedData.isTooling = vm.queryTooling();
     let query = queryInput.getValue();
     let queryMethod = exportedData.isTooling ? "tooling/query" : vm.queryAll() ? "queryAll" : "query";
-    spinFor(askSalesforce("/services/data/v35.0/" + queryMethod + "/?q=" + encodeURIComponent(query), exportProgress).then(function queryHandler(data) {
+    spinFor(askSalesforce("/services/data/v" + apiVersion + "/" + queryMethod + "/?q=" + encodeURIComponent(query), exportProgress).then(function queryHandler(data) {
       exportedData.addToTable(data.records);
       if (data.totalSize != -1) {
         exportedData.totalSize = data.totalSize;
