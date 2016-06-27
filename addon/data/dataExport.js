@@ -10,6 +10,8 @@ chrome.runtime.sendMessage({message: "getSession", orgId: orgId}, function(messa
 
   let queryInput = document.querySelector("#query");
 
+  document.getElementById("query").focus();
+
   let queryInputVm = {
     setValue(v) { queryInput.value = v; },
     getValue() { return queryInput.value; },
